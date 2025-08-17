@@ -36,6 +36,7 @@ Schedule the workflow (e.g., run daily at 9 AM).
 
 Enjoy automated job updates in your inbox + Google Sheet.
 
+<img width="1915" height="1044" alt="image" src="https://github.com/user-attachments/assets/a3edd210-dd25-4947-bc6b-2740a8372bd3" />
 
 <img width="1678" height="704" alt="image" src="https://github.com/user-attachments/assets/5a84602f-4c6b-4bcf-a73c-fff4ec732844" />
 
