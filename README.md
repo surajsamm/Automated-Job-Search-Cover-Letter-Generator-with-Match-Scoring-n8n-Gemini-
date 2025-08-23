@@ -38,7 +38,7 @@ Enjoy automated job updates in your inbox + Google Sheet.
 
 <img width="1915" height="1044" alt="image" src="https://github.com/user-attachments/assets/a3edd210-dd25-4947-bc6b-2740a8372bd3" />
 
-<img width="1677" height="272" alt="image" src="https://github.com/user-attachments/assets/be4c7915-7f66-45c3-b35f-3994a62be1a8" />
+<img width="1597" height="261" alt="image" src="https://github.com/user-attachments/assets/202dc5ed-8806-48cc-88ed-dc29ced64f0c" />
 
 <img width="1971" height="952" alt="image" src="https://github.com/user-attachments/assets/b3acb092-674b-45d6-9f1e-7ea99b0b145c" />
 
