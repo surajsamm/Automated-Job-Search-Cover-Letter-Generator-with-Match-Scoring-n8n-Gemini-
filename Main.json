@@ -1,0 +1,550 @@
+{
+  "name": "Main",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -48,
+        0
+      ],
+      "id": "e214db9f-5ca0-4d7f-bf55-67028460a046",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/bpgpO8mjiYpSNlnE.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        112,
+        0
+      ],
+      "id": "5b24b302-0fa1-4dc9-ba4b-50884ff78442",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.link }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "id": "d05d760e-a552-4e6c-a7b7-c62e8e9f6794",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.0-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "your role is System, you're in system message mode, you're an intelligent bot rating how closely a job listing is to a candidate skill set, on a 5 score.\nGive the following points:\na) 3 points for skills matching, 1 point for mostly matching\nb) 1 point for it being the right experience level\nc) 1 point for it being a remote position\nd) 1 point if past job experience matches the job role\ne) 1 point if the skills on the resume align with the job\nf) 3 points if I meet that job qualification",
+              "role": "model"
+            },
+            {
+              "content": "=here's the job site:\n {{ $json.data }}"
+            },
+            {
+              "content": "Extract the following details from the job posting and output strictly in JSON format:\n\n{\n  \"company_name\": \"\",\n  \"benefits\": \"\",\n  \"job_description\": \"Summarize the role in 200 characters or less\",\n  \"location\": \"\",\n  \"contact_number\": \"\",\n  \"company_email\": \"\"\n}\n",
+              "role": "model"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        896,
+        0
+      ],
+      "id": "adaea1eb-b8dd-4c66-992f-aed67410ddfe",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "VCCwP4rpYwPs7qQ9",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: raw string JSON inside item\n// Output: clean object (no nesting)\n\nreturn items.map(item => {\n  // Parse the nested text field\n  const rawText = item.json.content.parts[0].text;\n  const parsed = JSON.parse(rawText);\n\n  return { json: parsed };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        0
+      ],
+      "id": "7cd72b45-e103-4272-9a0f-8fd4ede47c39",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.0-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "your role is System, you're in system message mode, you're an intelligent bot rating how closely a job listing is to a candidate skill set, on a 5 score.\n\n",
+              "role": "model"
+            },
+            {
+              "content": "=here's the job listing details:\n{{ $('HTTP Request').item.json.data }}\n\nhere is sample resume :\n{\n  \"name\": \"Suraj Kumar\",\n  \"email\": \"cocsamcoc69@gmail.com\",\n  \"phone\": \"8340616431\",\n  \"skills\": [\"Python\", \"SQL\", \"Tableau\", \"Excel\", \"Power BI\", \"Pandas\", \"Numpy\", \"Matplotlib\", \"Seaborn\", \"BeautifulSoup\"],\n  \"education\": \"B.Tech Science and Technology, SRM Institute (2019-2023), CGPA: 8.12\",\n  \"experience\": \"Data Science Intern at AlmaBetter (2024-Present), Data Analytics Trainee at Trainity (Dec 2023 - Mar 2024)\",\n  \"location\": \"India\",\n  \"profiles\": {\n    \"github\": \"https://github.com/surajsamm\",\n    \"linkedin\": \"https://www.linkedin.com/in/suraj-kumar-7581b6355/\",\n    \"hackerrank\": \"https://www.hackerrank.com/profile/cocsamcoc69\"\n  }\n}\n"
+            },
+            {
+              "content": "Read the resume carefully and output strictly in JSON format:\n\n{\n\"name\": \"\",\n\"rating\": \"/100\"//out of 100\n}\n\n",
+              "role": "model"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        0
+      ],
+      "id": "749a6dde-986e-437b-a903-eea41892fbda",
+      "name": "Message a model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "VCCwP4rpYwPs7qQ9",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: raw string JSON inside item\n// Output: clean object (no nesting)\n\nreturn items.map(item => {\n  // Parse the nested text field\n  const rawText = item.json.content.parts[0].text;\n  const parsed = JSON.parse(rawText);\n\n  return { json: parsed };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1824,
+        0
+      ],
+      "id": "54310b9d-7619-47ab-ba43-3fe5213204be",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.0-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "you are intelligent bot perfect at creating cover letters for a job|[ Please take the candidates resume and create a customized cover letter to the job ",
+              "role": "model"
+            },
+            {
+              "content": "=here is a job listing deatails:\nTitle:{{ $('RSS Read').item.json.title }}\nDiscription:{{ $('Code').item.json.job_description }}\nName:{{ $('Code').item.json.company_name }}\nLocation:{{ $('Code').item.json.location }}\nYour Name:{{ $json.name }}"
+            },
+            {
+              "content": "You are an intelligent assistant that generates professional and customized cover letters. and output strictly in JSON format:  \n\n{\n  \"cover_letter\": \"\"\n}\n",
+              "role": "model"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        2048,
+        0
+      ],
+      "id": "bb8fe7df-015c-4b31-b516-c544cb24fa8e",
+      "name": "Message a model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "VCCwP4rpYwPs7qQ9",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  // Get raw JSON string from the item\n  const rawText = item.json.content.parts[0].text;\n\n  // Remove all \\n from the string before parsing\n  const cleanedText = rawText.replace(/\\\\n/g, \" \");\n\n  // Parse into JSON\n  const parsed = JSON.parse(cleanedText);\n\n  return { json: parsed };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        0
+      ],
+      "id": "96ff0f48-b850-4cdd-8a5d-58f66412af58",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "sendTo": "cocsamcoc69@gmail.com",
+        "subject": "Cover Letter Generator with Match Scoring",
+        "message": "=<b>Title:</b> {{ $json[\"Title\"] }} <br><br>\n\n<b>Job Description:</b> {{ $json[\"Job Description\"] }} <br><br>\n\n<b>Link:</b> <a href=\"{{ $json[\"Link\"] }}\">{{ $json[\"Link\"] }}</a> <br><br>\n\n<b>Date:</b> {{ $json[\"Date\"] }} <br><br>\n\n<b>Rating:</b> {{ $json[\"Rating\"] }}/100 <br><br>\n\n<b>Company Name:</b> {{ $json[\"Company Name\"] }} <br><br>\n\n<b>Benefits:</b> {{ $json[\"Benefits\"] }} <br><br>\n\n<b>Cover Letter:</b><br><br>\n{{ $json[\"Cover Letter\"].replace(/\\n/g, \"<br>\") }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2848,
+        0
+      ],
+      "id": "0988862c-de8d-4f47-87e1-cf4ad2e835b8",
+      "name": "Send a message",
+      "webhookId": "522b3e10-14b3-4bdd-a784-de38b38bc31f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "rD1ery7G9bo1kVUu",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1b3DnUBvtt_TygZ6V9WbWxQTXMBY9akrQ_Wbl4PKG8EY",
+          "mode": "list",
+          "cachedResultName": "JD",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1b3DnUBvtt_TygZ6V9WbWxQTXMBY9akrQ_Wbl4PKG8EY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1b3DnUBvtt_TygZ6V9WbWxQTXMBY9akrQ_Wbl4PKG8EY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Cover Letter": "={{ $json.cover_letter }}",
+            "Rating": "={{ $('Code1').item.json.rating }}",
+            "Title": "={{ $('Code3').item.json.title }}",
+            "Link": "={{ $('Code3').item.json.link }}",
+            "Date": "={{ $('Code3').item.json.pubDate }}",
+            "Job Description": "={{ $('Code').item.json.job_description }}",
+            "Company Name": "={{ $('Code').item.json.company_name }}",
+            "Benefits": "={{ $('Code').item.json.benefits }}"
+          },
+          "matchingColumns": [
+            "Link"
+          ],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job Description",
+              "displayName": "Job Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Rating",
+              "displayName": "Rating",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Benefits",
+              "displayName": "Benefits",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cover Letter",
+              "displayName": "Cover Letter",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2624,
+        0
+      ],
+      "id": "726c4c60-5fe9-465e-bd2d-ab12c4b09a67",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "thOhrgQwUcC5RamE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get total jobs from RSS\nconst total = items.length;\n\n// Generate a truly random index\nconst randomIndex = Math.floor(Math.random() * total);\n\n// Pick that job\nreturn [ items[randomIndex] ];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        0
+      ],
+      "id": "40c7da90-d4ad-4605-a3f1-78c2e55e7028",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        288,
+        0
+      ],
+      "id": "d967c0c7-ca77-48bc-9c1d-42fb4f7c8251",
+      "name": "Loop Over Items"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model2": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Message a model2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6b74fc76-2f0b-4cc3-9d1b-22389250934c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bc46fb6cfa8d3f4d382d2065a176b6907c2577fd43d92fdd6074e680f34fa1bb"
+  },
+  "id": "NXNkhczLbOv7xYW9",
+  "tags": []
+}
